@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	start = flag.String("start", "addr", "the parser name for the start url")
+	start = flag.String("start", "addr_year", "the parser name for the start url")
 	dir   = flag.String("dir", "data", "the data dir")
 	qDir  = flag.String("q", "q", "the queue dir")
 	sleep = flag.Int("sleep", -1, "in seconds")

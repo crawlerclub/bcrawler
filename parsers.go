@@ -5,10 +5,12 @@ import (
 	"flag"
 	"io/ioutil"
 	"path/filepath"
+	"strings"
 	"sync"
 
 	"crawler.club/dl"
 	"crawler.club/et"
+	"github.com/crawlerclub/ce"
 )
 
 var (
@@ -48,13 +50,37 @@ func ParseTask(task *et.UrlTask) (
 
 func Parse(name, url string) (
 	[]*et.UrlTask, []map[string]interface{}, error) {
-	p, err := pool.GetParser(name, false)
-	if err != nil {
-		return nil, nil, err
-	}
 	ret := dl.Download(&dl.HttpRequest{Url: url, Retry: 3, Platform: "pc"})
 	if ret.Error != nil {
 		return nil, nil, ret.Error
 	}
-	return p.Parse(ret.Text, url)
+	page := ret.Text
+	switch strings.ToLower(name) {
+	case "content_":
+		items := strings.Split(ret.RemoteAddr, ":")
+		ip := ""
+		if len(items) > 0 {
+			ip = items[0]
+		}
+		doc := ce.ParsePro(url, page, ip, false)
+		return nil, []map[string]interface{}{
+			map[string]interface{}{"doc": doc}}, nil
+	case "link_":
+		links, err := et.ParseNewLinks(page, url)
+		if err != nil {
+			return nil, nil, err
+		}
+		var tasks []*et.UrlTask
+		for _, link := range links {
+			tasks = append(tasks, &et.UrlTask{
+				ParserName: "content_", Url: link})
+		}
+		return tasks, nil, nil
+	default:
+		p, err := pool.GetParser(name, false)
+		if err != nil {
+			return nil, nil, err
+		}
+		return p.Parse(page, url)
+	}
 }

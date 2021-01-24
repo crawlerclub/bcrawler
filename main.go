@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	start = flag.String("start", "addr_year", "the parser name for the start url")
+	start = flag.String("start", "", "the parser name for the start url, if omitted, will start from seeds.json")
 	dir   = flag.String("dir", "data", "the data dir")
 	qDir  = flag.String("q", "q", "the queue dir")
 	sleep = flag.Int("sleep", -1, "in seconds")
@@ -28,10 +28,6 @@ func main() {
 		glog.Fatal(err)
 	}
 	defer fs.Close()
-	p, err := pool.GetParser(*start, false)
-	if err != nil {
-		glog.Fatal(err)
-	}
 
 	q, err := ds.OpenQueue(*qDir)
 	if err != nil {
@@ -39,10 +35,30 @@ func main() {
 	}
 	defer q.Close()
 
-	glog.Infof("start crawling from %s", p.ExampleUrl)
+	if *start != "" {
+		p, err := pool.GetParser(*start, false)
+		if err != nil {
+			glog.Fatal(err)
+		}
 
-	if goutil.FileGuard("first.lock") {
-		q.EnqueueObject(&et.UrlTask{ParserName: *start, Url: p.ExampleUrl})
+		glog.Infof("start crawling from %s", p.ExampleUrl)
+
+		if goutil.FileGuard("first.lock") {
+			q.EnqueueObject(&et.UrlTask{ParserName: *start, Url: p.ExampleUrl})
+		}
+	} else {
+		seeds, err := GetSeeds()
+		if err != nil {
+			glog.Fatal(err)
+		}
+		if len(seeds) == 0 {
+			glog.Fatal("no seeds found!")
+		}
+		glog.Infof("start crawling from %d seeds in seeds.json", len(seeds))
+		for _, seed := range seeds {
+			q.EnqueueObject(seed)
+		}
+
 	}
 
 	var task = new(et.UrlTask)

@@ -41,6 +41,19 @@ func (p *Parsers) GetParser(name string, refresh bool) (*et.Parser, error) {
 	return parser, nil
 }
 
+func GetSeeds() ([]*et.UrlTask, error) {
+	seedsFile := filepath.Join(*conf, "seeds.json")
+	content, err := ioutil.ReadFile(seedsFile)
+	if err != nil {
+		return nil, err
+	}
+	var seeds []*et.UrlTask
+	if err = json.Unmarshal(content, &seeds); err != nil {
+		return nil, err
+	}
+	return seeds, nil
+}
+
 var pool = &Parsers{items: make(map[string]*et.Parser)}
 
 func ParseTask(task *et.UrlTask) (

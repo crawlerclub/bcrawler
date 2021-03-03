@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"flag"
 	"io/ioutil"
@@ -89,6 +90,10 @@ func Parse(name, url string) (
 				ParserName: "content_", Url: link})
 		}
 		return tasks, nil, nil
+	case "raw_":
+		return nil, []map[string]interface{}{
+			map[string]interface{}{
+				"base64_content": base64.StdEncoding.EncodeToString(ret.Content)}}, nil
 	default:
 		p, err := pool.GetParser(name, false)
 		if err != nil {

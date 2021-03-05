@@ -13,10 +13,11 @@ import (
 )
 
 var (
-	start = flag.String("start", "", "the parser name for the start url, if omitted, will start from seeds.json")
-	dir   = flag.String("dir", "data", "the data dir")
-	qDir  = flag.String("q", "q", "the queue dir")
-	sleep = flag.Int("sleep", -1, "in seconds")
+	start    = flag.String("start", "", "the parser name for the start url, if omitted, will start from seeds.json")
+	startURL = flag.String("start_url", "", "the start url, if ommited, will start from parser.ExampleUrl")
+	dir      = flag.String("dir", "data", "the data dir")
+	qDir     = flag.String("q", "q", "the queue dir")
+	sleep    = flag.Int("sleep", -1, "in seconds")
 )
 
 func main() {
@@ -39,6 +40,9 @@ func main() {
 		p, err := pool.GetParser(*start, false)
 		if err != nil {
 			glog.Fatal(err)
+		}
+		if *startURL != "" {
+			p.ExampleUrl = *startURL
 		}
 
 		glog.Infof("start crawling from %s", p.ExampleUrl)

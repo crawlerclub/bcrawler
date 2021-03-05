@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 
 	"crawler.club/ce"
 	"crawler.club/dl"
@@ -78,7 +79,12 @@ func Parse(name, url string) (
 		}
 		doc := ce.ParsePro(url, page, ip, false)
 		return nil, []map[string]interface{}{
-			map[string]interface{}{"doc": doc}}, nil
+			map[string]interface{}{
+				"from_url_":    url,
+				"from_parser_": "content_",
+				"crawl_time_":  time.Now().UTC().Format(time.RFC3339),
+				"doc":          doc,
+			}}, nil
 	case "link_":
 		links, err := et.ParseNewLinks(page, url)
 		if err != nil {
@@ -93,7 +99,11 @@ func Parse(name, url string) (
 	case "raw_":
 		return nil, []map[string]interface{}{
 			map[string]interface{}{
-				"base64_content": base64.StdEncoding.EncodeToString(ret.Content)}}, nil
+				"from_url_":      url,
+				"from_parser_":   "raw_",
+				"crawl_time_":    time.Now().UTC().Format(time.RFC3339),
+				"base64_content": base64.StdEncoding.EncodeToString(ret.Content),
+			}}, nil
 	default:
 		p, err := pool.GetParser(name, false)
 		if err != nil {

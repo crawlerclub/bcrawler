@@ -9,9 +9,9 @@ import (
 	"strings"
 	"sync"
 
+	"crawler.club/ce"
 	"crawler.club/dl"
 	"crawler.club/et"
-	"github.com/crawlerclub/ce"
 )
 
 var (

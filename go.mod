@@ -1,4 +1,4 @@
-module github.com/crawlerclub/bcrawler
+module crawler.club/bcrawler
 
 go 1.15
 

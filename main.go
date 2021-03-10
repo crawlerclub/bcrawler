@@ -17,6 +17,7 @@ var (
 	startURL = flag.String("start_url", "", "the start url, if ommited, will start from parser.ExampleUrl")
 	dir      = flag.String("dir", "data", "the data dir")
 	qDir     = flag.String("q", "q", "the queue dir")
+	force    = flag.Bool("f", false, "force recrawl, ignore first.lock")
 	sleep    = flag.Int("sleep", -1, "in seconds")
 )
 
@@ -47,7 +48,7 @@ func main() {
 
 		glog.Infof("start crawling from %s", p.ExampleUrl)
 
-		if goutil.FileGuard("first.lock") {
+		if *force || goutil.FileGuard("first.lock") {
 			q.EnqueueObject(&et.UrlTask{ParserName: *start, Url: p.ExampleUrl})
 		}
 	} else {
